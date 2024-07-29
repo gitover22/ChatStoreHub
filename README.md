@@ -31,12 +31,20 @@ sudo cephadm bootstrap --mon-ip 192.168.178.128
 ```shell
 sudo cephadm shell -- ceph -s
 ```
-添加服务器：
+为其他服务器添加公钥：
 ```shell
-sudo ceph orch host add 192.168.178.129
-sudo ceph orch host add 192.168.178.133
+cat /etc/ceph/ceph.pub
+ssh-copy-id -f -i /etc/ceph/ceph.pub root@192.168.178.129
+ssh-copy-id -f -i /etc/ceph/ceph.pub root@192.168.178.133
+```
+为集群添加服务器：
+```shell
+sudo cephadm shell -- ceph orch host add node2 192.168.178.129
+sudo cephadm shell -- ceph orch host add node3 192.168.178.133
 ```
 将三台主机设置为MON服务：
 ```shell
-sudo ceph orch apply mon --placement="192.168.178.128,192.168.178.129,192.168.178.133"
+sudo cephadm shell -- ceph orch apply mon --unmanaged # 关闭MON自动部署
+sudo cephadm shell -- ceph orch daemon add mon node2:192.168.178.129
+sudo cephadm shell -- ceph orch daemon add mon node3:192.168.178.133
 ```
