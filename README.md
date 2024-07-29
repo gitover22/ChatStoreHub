@@ -25,14 +25,18 @@ sudo ./install_cephadm.sh
 ```
 执行：
 ```shell
-cephadm bootstrap --mon-ip 192.168.178.128
+sudo cephadm bootstrap --mon-ip 192.168.178.128
+```
+查看集群状态:
+```shell
+sudo cephadm shell -- ceph -s
 ```
 添加服务器：
 ```shell
-ceph orch host add 192.168.178.129
-ceph orch host add 192.168.178.133
+sudo ceph orch host add 192.168.178.129
+sudo ceph orch host add 192.168.178.133
 ```
 将三台主机设置为MON服务：
 ```shell
-ceph orch apply mon --placement="192.168.178.128,192.168.178.129,192.168.178.133"
+sudo ceph orch apply mon --placement="192.168.178.128,192.168.178.129,192.168.178.133"
 ```
