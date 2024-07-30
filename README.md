@@ -16,8 +16,8 @@ sudo ./install_nginx.sh
 
 
 
-### ceph([详细文档](https://docs.ceph.com/en/reef/))
-![](./resource/ceph_host.png)
+### ceph([文档链接](https://docs.ceph.com/en/reef/))
+![](./resource/ceph_nodes.png)
 在128上安装cephadm:
 ```shell
 cd prerequisites
@@ -48,3 +48,19 @@ sudo cephadm shell -- ceph orch apply mon --unmanaged # 关闭MON自动部署
 sudo cephadm shell -- ceph orch daemon add mon node2:192.168.178.129
 sudo cephadm shell -- ceph orch daemon add mon node3:192.168.178.133
 ```
+查看目前集群状态，显示为：
+![](./resource/state1.png)
+部署OSD：(根据实际磁盘情况部署)
+```shell
+sudo cephadm shell -- ceph orch daemon add osd huafeng-virtual-machine:/dev/sdb
+sudo cephadm shell -- ceph orch daemon add osd node2:/dev/sdb
+sudo cephadm shell -- ceph orch daemon add osd node3:/dev/sdb
+```
+查看目前集群状态，显示为：
+![](./resource/state2.png)
+创建cephfs：
+```shell
+sudo cephadm shell -- ceph fs volume create cephfs
+```
+查看目前集群状态，显示为：
+![](./resource/state3.png)
