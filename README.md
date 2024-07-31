@@ -64,3 +64,9 @@ sudo cephadm shell -- ceph fs volume create cephfs
 ```
 查看目前集群状态，显示为：
 ![](./resource/state3.png)
+安装Librados库：
+```shell
+sudo apt-get install librados-dev
+```
+
+
