@@ -17,7 +17,7 @@ sudo ./install_nginx.sh
 
 
 ### ceph([文档链接](https://docs.ceph.com/en/reef/))
-![](./resource/ceph_node.png)
+![](./resource/ceph_nodes.png)
 在128上安装cephadm:
 ```shell
 cd prerequisites
@@ -71,3 +71,8 @@ sudo apt-get install librados-dev
 ```
 
 
+备注：
+关闭所有服务：
+sudo systemctl stop --all ceph\*.service ceph\*.target
+开启所有服务：
+sudo systemctl start --all ceph*.service ceph*.target

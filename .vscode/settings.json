@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "librados.h": "c",
+        "string": "cpp",
+        "iostream": "cpp"
+    }
+}
