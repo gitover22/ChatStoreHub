@@ -1,6 +1,13 @@
 # ChatStoreHub
 
+
+
+
 ## 部署步骤
+### prerequisites
+```shell
+sudo apt-get install -y libmicrohttpd-dev libmysqlclient-dev mysql-server
+```
 ### nginx
 各个节点安装nginx:
 

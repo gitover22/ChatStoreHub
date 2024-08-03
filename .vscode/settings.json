@@ -3,6 +3,8 @@
         "librados.h": "c",
         "string": "cpp",
         "iostream": "cpp",
-        "cstdlib": "cpp"
+        "cstdlib": "cpp",
+        "mysql.h": "c",
+        "microhttpd.h": "c"
     }
 }
