@@ -9,13 +9,6 @@ cd prerequisites
 sudo ./install_nginx.sh
 ```
 
-
-
-
-
-
-
-
 ### ceph([文档链接](https://docs.ceph.com/en/reef/))
 ![](./resource/ceph_nodes.png)
 在128上安装cephadm:

@@ -3,34 +3,45 @@
 #include <stdlib.h>
 
 int main(int argc, char *argv[]) {
-    if (argc != 3) {
-        fprintf(stderr, "Usage: %s <cluster_config_file> <file_to_upload>\n", argv[0]);
+    if (argc != 2) {
+        fprintf(stderr, "Usage: %s <file_to_upload>\n", argv[0]);
         return 1;
     }
 
-    char *config_file = argv[1];
-    char *filename = argv[2];
+    char *filename = argv[1];
     char *object_name = "uploaded_object";
+    char cluster_name[] = "ceph";
+    char user_name[] = "client.admin";
+    uint64_t flags = 0;
     rados_t cluster;
     rados_ioctx_t io;
     int ret;
 
-    // 初始化 Ceph 集群
-    ret = rados_create(&cluster, NULL);
+    // 初始化
+    ret = rados_create2(&cluster,cluster_name, user_name, flags);
     if (ret < 0) {
         fprintf(stderr, "Failed to create cluster, error %d\n", ret);
         return 1;
     }
 
     // 读取集群配置文件
-    ret = rados_conf_read_file(cluster, config_file);
+    ret = rados_conf_read_file(cluster, "/etc/ceph/ceph.conf");
     if (ret < 0) {
-        fprintf(stderr, "Failed to read config file %s, error %d\n", config_file, ret);
+        fprintf(stderr, "Failed to read config file /etc/ceph/ceph.conf, error %d\n", ret);
         rados_shutdown(cluster);
         return 1;
     }
 
-    // 连接到集群
+    // /* Read command line arguments */
+    // ret = rados_conf_parse_argv(cluster, argc, argv);
+    // if (ret < 0) {
+    //         fprintf(stderr, "%s: cannot parse command line arguments: %s\n", argv[0], strerror(-ret));
+    //         exit(EXIT_FAILURE);
+    // } else {
+    //         printf("\nRead the command line arguments.\n");
+    // }
+
+    // 连接
     ret = rados_connect(cluster);
     if (ret < 0) {
         fprintf(stderr, "Failed to connect to cluster, error %d\n", ret);
@@ -39,7 +50,8 @@ int main(int argc, char *argv[]) {
     }
 
     // 创建 I/O 上下文
-    ret = rados_ioctx_create(cluster, "data_pool", &io);
+    char *poolname = "cephfs.cephfs.data";
+    ret = rados_ioctx_create(cluster, poolname, &io);
     if (ret < 0) {
         fprintf(stderr, "Failed to create io context, error %d\n", ret);
         rados_shutdown(cluster);
@@ -84,7 +96,6 @@ int main(int argc, char *argv[]) {
     printf("Object Name: %s\n", object_name);
     printf("Size: %d bytes\n", size);
 
-    // 清理资源
     rados_ioctx_destroy(io);
     rados_shutdown(cluster);
 
