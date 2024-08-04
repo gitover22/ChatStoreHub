@@ -142,7 +142,7 @@ void request_completed(void *cls, struct MHD_Connection *connection, void **con_
     *con_cls = NULL;
 }
 
-int main() {
+int main(int argc ,char **argv) {
     struct MHD_Daemon *daemon;
 
     daemon = MHD_start_daemon(MHD_USE_SELECT_INTERNALLY, PORT, NULL, NULL,
