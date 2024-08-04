@@ -4,7 +4,7 @@
 #include <microhttpd.h>
 #include <mysql/mysql.h>
 
-#define PORT 8888
+#define PORT 10000
 #define DB_HOST "localhost"
 #define DB_USER "huafeng"
 #define DB_PASS "huafeng"
@@ -145,14 +145,30 @@ void request_completed(void *cls, struct MHD_Connection *connection, void **con_
 int main(int argc ,char **argv) {
     struct MHD_Daemon *daemon;
 
+    // 启动一个守护进程，负责监听指定端口并处理HTTP请求
+    // 使用MHD_START_DAEMON宏来启动守护进程
+    // 参数说明：
+    // MHD_USE_SELECT_INTERNALLY：使用select进行内部轮询
+    // PORT：监听的端口号
+    // NULL, NULL：没有额外的配置参数
+    // request_handler：处理HTTP请求的函数
+    // NULL：没有额外的配置参数
+    // MHD_OPTION_NOTIFY_COMPLETED：当请求完成时调用回调函数
+    // request_completed：请求完成时的回调函数
+    // NULL：没有额外的配置参数
+    // MHD_OPTION_END：参数列表的结束标志
     daemon = MHD_start_daemon(MHD_USE_SELECT_INTERNALLY, PORT, NULL, NULL,
                               &request_handler, NULL, MHD_OPTION_NOTIFY_COMPLETED, request_completed, NULL, MHD_OPTION_END);
+    // 如果守护进程启动失败，则返回错误码1
     if (daemon == NULL)
         return 1;
 
+    // 输出服务器运行信息，包括监听的端口号
     printf("Server is running on port %d\n", PORT);
+    // 等待用户操作（按下任意键），以便可以手动停止服务器
     getchar();
 
+    // 停止守护进程
     MHD_stop_daemon(daemon);
 
     return 0;
