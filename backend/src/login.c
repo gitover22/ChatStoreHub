@@ -159,11 +159,10 @@ int main(int argc ,char **argv) {
     // MHD_OPTION_END：参数列表的结束标志
     daemon = MHD_start_daemon(MHD_USE_SELECT_INTERNALLY, PORT, NULL, NULL,
                               &request_handler, NULL, MHD_OPTION_NOTIFY_COMPLETED, request_completed, NULL, MHD_OPTION_END);
-    // 如果守护进程启动失败，则返回错误码1
+    // 守护进程启动失败
     if (daemon == NULL)
         return 1;
 
-    // 输出服务器运行信息，包括监听的端口号
     printf("Server is running on port %d\n", PORT);
     // 等待用户操作（按下任意键），以便可以手动停止服务器
     getchar();
