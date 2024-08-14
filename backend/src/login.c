@@ -17,6 +17,7 @@ struct connection_info_struct {
 };
 
 int check_user(const char *username, const char *password) {
+    printf("Checking user: %s, password: %s\n", username, password);
     MYSQL *conn;
     MYSQL_RES *res;
     MYSQL_ROW row;
@@ -117,14 +118,17 @@ int request_handler(void *cls, struct MHD_Connection *connection,
             sscanf(con_info->post_data, "username=%49[^&]&password=%49s", username, password);
 
             if (check_user(username, password)) {
-                return send_response(connection, "{\"message\": \"登录成功\", \"success\": 1}", MHD_HTTP_OK);
+                const char *success_page = "<html><body><h1>登录成功</h1><p>欢迎回来，用户！</p></body></html>";
+                return send_response(connection, success_page, MHD_HTTP_OK);
             } else {
-                return send_response(connection, "{\"message\": \"用户名或密码错误\", \"success\": 0}", MHD_HTTP_UNAUTHORIZED);
+                const char *fail_page = "<html><body><h1>登录失败</h1><p>用户名或密码错误，请重试。</p></body></html>";
+                return send_response(connection, fail_page, MHD_HTTP_UNAUTHORIZED);
             }
         }
     }
 
-    return send_response(connection, "{\"message\": \"Bad Request\", \"success\": 0}", MHD_HTTP_BAD_REQUEST);
+    const char *bad_request_page = "<html><body><h1>错误请求</h1><p>请求无效，请使用POST方法提交数据。</p></body></html>";
+    return send_response(connection, bad_request_page, MHD_HTTP_BAD_REQUEST);
 }
 
 void request_completed(void *cls, struct MHD_Connection *connection, void **con_cls,
@@ -145,29 +149,14 @@ void request_completed(void *cls, struct MHD_Connection *connection, void **con_
 int main(int argc ,char **argv) {
     struct MHD_Daemon *daemon;
 
-    // 启动一个守护进程，负责监听指定端口并处理HTTP请求
-    // 使用MHD_START_DAEMON宏来启动守护进程
-    // 参数说明：
-    // MHD_USE_SELECT_INTERNALLY：使用select进行内部轮询
-    // PORT：监听的端口号
-    // NULL, NULL：没有额外的配置参数
-    // request_handler：处理HTTP请求的函数
-    // NULL：没有额外的配置参数
-    // MHD_OPTION_NOTIFY_COMPLETED：当请求完成时调用回调函数
-    // request_completed：请求完成时的回调函数
-    // NULL：没有额外的配置参数
-    // MHD_OPTION_END：参数列表的结束标志
     daemon = MHD_start_daemon(MHD_USE_SELECT_INTERNALLY, PORT, NULL, NULL,
                               &request_handler, NULL, MHD_OPTION_NOTIFY_COMPLETED, request_completed, NULL, MHD_OPTION_END);
-    // 守护进程启动失败
     if (daemon == NULL)
         return 1;
 
     printf("Server is running on port %d\n", PORT);
-    // 等待用户操作（按下任意键），以便可以手动停止服务器
     getchar();
 
-    // 停止守护进程
     MHD_stop_daemon(daemon);
 
     return 0;
