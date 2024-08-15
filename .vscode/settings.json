@@ -5,6 +5,8 @@
         "iostream": "cpp",
         "cstdlib": "cpp",
         "mysql.h": "c",
-        "microhttpd.h": "c"
+        "microhttpd.h": "c",
+        "string.h": "c",
+        "stdio.h": "c"
     }
 }
