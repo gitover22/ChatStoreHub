@@ -61,7 +61,9 @@ int send_response(struct MHD_Connection *connection, const char *message, int st
     struct MHD_Response *response;
     int ret;
 
+    // 添加Content-Type头信息，指定UTF-8编码
     response = MHD_create_response_from_buffer(strlen(message), (void *)message, MHD_RESPMEM_PERSISTENT);
+    MHD_add_response_header(response, MHD_HTTP_HEADER_CONTENT_TYPE, "text/html; charset=UTF-8");
     ret = MHD_queue_response(connection, status_code, response);
     MHD_destroy_response(response);
 
