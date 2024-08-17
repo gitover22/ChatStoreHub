@@ -33,4 +33,5 @@
 
 
 push.sh
-/llama
+/backend/log/
+/backend/build/

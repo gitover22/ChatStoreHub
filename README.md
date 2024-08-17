@@ -1,5 +1,6 @@
 # ChatStoreHub
-
+## introduction
+ChatStoreHub is a chat server based on the WebSocket protocol. It provides a simple and efficient way to store and retrieve chat messages.
 
 
 
@@ -76,3 +77,11 @@ sudo apt-get install librados-dev
 sudo systemctl stop --all ceph\*.service ceph\*.target
 开启所有服务：
 sudo systemctl start --all ceph*.service ceph*.target
+
+### backend
+```shell
+cd backend
+./build.sh
+cd ..
+./run_nginx.sh
+```
