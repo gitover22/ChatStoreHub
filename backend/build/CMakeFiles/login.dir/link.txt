@@ -1,0 +1,1 @@
+/usr/bin/cc CMakeFiles/login.dir/src/login.c.o CMakeFiles/login.dir/src/log.c.o -o login  -lmicrohttpd /usr/lib/x86_64-linux-gnu/libmysqlclient.so 

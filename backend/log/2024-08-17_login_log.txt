@@ -1,0 +1,12 @@
+Server is running on port 10000
+
+Server is running on port 10000
+
+Server is running on port 10000
+
+Failed to start MHD daemon
+
+Server is running on port 10000
+
+Failed to start MHD daemon
+

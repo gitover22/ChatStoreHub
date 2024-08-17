@@ -3,13 +3,16 @@
 #include <string.h>
 #include <microhttpd.h>
 #include <mysql/mysql.h>
+#include "log.h"
+#include <signal.h>
 
 #define PORT 10000
 #define DB_HOST "127.0.0.1"
 #define DB_USER "huafeng"
 #define DB_PASS "huafeng"
 #define DB_NAME "CSH"
-
+// 全局的日志句柄
+LogHandle login_log;
 struct connection_info_struct
 {
     char *post_data;
@@ -30,8 +33,7 @@ struct connection_info_struct
 int check_user(const char *username, const char *password)
 {
     // 打印正在检查的用户名和密码
-    printf("Checking user: %s, password: %s\n", username, password);
-
+    write_log(&login_log,"Checking user: %s, password: %s\n", username, password);
     // 初始化MySQL连接对象
     MYSQL *conn;
     // 初始化结果集对象
@@ -45,7 +47,8 @@ int check_user(const char *username, const char *password)
     if (conn == NULL)
     {
         // 初始化失败，打印错误信息
-        fprintf(stderr, "mysql_init() failed\n");
+        write_log(&login_log,"mysql_init() failed\n");
+        
         // 返回错误
         return 0;
     }
@@ -54,7 +57,8 @@ int check_user(const char *username, const char *password)
     if (mysql_real_connect(conn, DB_HOST, DB_USER, DB_PASS, DB_NAME, 0, NULL, 0) == NULL)
     {
         // 连接失败，打印错误信息
-        fprintf(stderr, "mysql_real_connect() failed: %s\n", mysql_error(conn));
+        write_log(&login_log,"mysql_real_connect() failed: %s\n", mysql_error(conn));
+
         // 关闭数据库连接
         mysql_close(conn);
         // 返回错误
@@ -70,7 +74,8 @@ int check_user(const char *username, const char *password)
     if (mysql_query(conn, query))
     {
         // 查询错误，打印错误信息
-        fprintf(stderr, "SELECT error: %s\n", mysql_error(conn));
+        write_log(&login_log,"SELECT error: %s\n", mysql_error(conn));
+
         // 关闭数据库连接
         mysql_close(conn);
         // 返回错误
@@ -83,7 +88,7 @@ int check_user(const char *username, const char *password)
     if (res == NULL)
     {
         // 获取失败，打印错误信息
-        fprintf(stderr, "mysql_store_result() failed\n");
+        write_log(&login_log,"mysql_store_result() failed\n");
         // 关闭数据库连接
         mysql_close(conn);
         // 返回错误
@@ -197,8 +202,6 @@ int request_handler(void *cls, struct MHD_Connection *connection,
                     const char *url, const char *method, const char *version,
                     const char *upload_data, size_t *upload_data_size, void **con_cls)
 {
-    printf("%s %s %s\n", method, url, version);
-    printf("data:%s   upload_data_size:%d \n", upload_data, *upload_data_size);
     // 判断是否是新的连接，如果是，分配结构体并初始化
     if (NULL == *con_cls)
     {
@@ -243,19 +246,6 @@ int request_handler(void *cls, struct MHD_Connection *connection,
             // 手动解析POST数据
             char *username_start = strstr(con_info->post_data, "username=");
             char *password_start = strstr(con_info->post_data, "&password=");
-
-            // if (username_start && password_start) {
-            //     sscanf(username_start, "username=%49[^&]", username);
-            //     sscanf(password_start, "&password=%49s", password);
-
-            //     if (check_user(username, password)) {
-            //         const char *success_page = "<html><body><h1>登录成功</h1><p>欢迎回来，用户！</p></body></html>";
-            //         return send_response(connection, success_page, MHD_HTTP_OK);
-            //     } else {
-            //         const char *fail_page = "<html><body><h1>登录失败</h1><p>用户名或密码错误，请重试。</p></body></html>";
-            //         return send_response(connection, fail_page, MHD_HTTP_UNAUTHORIZED);
-            //     }
-            // }
             if (username_start && password_start)
             {
                 sscanf(username_start, "username=%49[^&]", username);
@@ -335,8 +325,68 @@ void request_completed(void *cls, struct MHD_Connection *connection, void **con_
     *con_cls = NULL;
 }
 
+int init_login_log() {
+    // 初始化日志系统，传入当前文件名部分
+    if (init_log(&login_log, "login") != 0) {
+        write_log(&login_log, "Failed to initialize login log file\n");
+
+        return -1;
+    }
+    return 0;
+}
+// 守护进程的运行标志
+volatile sig_atomic_t keep_running = 1;
+void handle_signal(int signal) {
+    keep_running = 0;
+}
+
+// 守护进程的初始化
+void daemonize() {
+    pid_t pid, sid;
+
+    // Fork off the parent process
+    pid = fork();
+    if (pid < 0) {
+        exit(EXIT_FAILURE);
+    }
+
+    // If we got a good PID, then we can exit the parent process.
+    if (pid > 0) {
+        exit(EXIT_SUCCESS);
+    }
+
+    // Change the file mode mask
+    umask(0);
+
+    // Open any logs here    
+
+    // Create a new SID for the child process
+    sid = setsid();
+    if (sid < 0) {
+        exit(EXIT_FAILURE);
+    }
+
+    // Change the current working directory
+    if ((chdir("/")) < 0) {
+        exit(EXIT_FAILURE);
+    }
+
+    // Close out the standard file descriptors
+    close(STDIN_FILENO);
+    close(STDOUT_FILENO);
+    close(STDERR_FILENO);
+}
 int main(int argc, char **argv)
 {
+    // 使程序成为守护进程
+    daemonize();
+    // 初始化日志
+    if (init_login_log() != 0) {
+        return 1;
+    }
+      // 设置信号处理函数
+    signal(SIGINT, handle_signal);  // 处理 Ctrl+C 信号
+    signal(SIGTERM, handle_signal); // 处理终止信号
     // 定义MHD守护进程结构体指针
     struct MHD_Daemon *daemon;
 
@@ -345,15 +395,22 @@ int main(int argc, char **argv)
     daemon = MHD_start_daemon(MHD_USE_SELECT_INTERNALLY, PORT, NULL, NULL,
                               &request_handler, NULL, MHD_OPTION_NOTIFY_COMPLETED, request_completed, NULL, MHD_OPTION_END);
     // 如果守护进程启动失败，返回错误码
-    if (daemon == NULL)
+    if (daemon == NULL) {
+        write_log(&login_log, "Failed to start MHD daemon\n");
+        close_log(&login_log);
         return 1;
+    }
 
-    // 打印服务器运行信息
-    printf("Server is running on port %d\n", PORT);
-    // 等待用户操作结束程序
-    getchar();
-
+    write_log(&login_log, "Server is running on port %d\n", PORT);
+    // 无限循环，直到捕捉到退出信号
+    while (keep_running) {
+        sleep(1);  // 每次循环睡眠1秒，减少CPU占用
+    }
+    
+    // 关闭日志
+    close_log(&login_log);
     // 停止MHD守护进程
     MHD_stop_daemon(daemon);
+
     return 0;
 }
