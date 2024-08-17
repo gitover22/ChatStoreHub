@@ -10,23 +10,25 @@
 #define DB_PASS "huafeng"
 #define DB_NAME "CSH"
 
-struct connection_info_struct {
+struct connection_info_struct
+{
     char *post_data;
     size_t post_data_len;
     struct MHD_PostProcessor *post_processor;
 };
 
 /**
- * @brief 检查用户是否存在于数据库中 
+ * @brief 检查用户是否存在于数据库中
  */
 /**
  * 检查用户是否存在于数据库中
- * 
+ *
  * @param username 用户名
  * @param password 密码
  * @return 如果用户存在返回1，否则返回0
  */
-int check_user(const char *username, const char *password) {
+int check_user(const char *username, const char *password)
+{
     // 打印正在检查的用户名和密码
     printf("Checking user: %s, password: %s\n", username, password);
 
@@ -40,7 +42,8 @@ int check_user(const char *username, const char *password) {
     // 初始化MySQL连接，为NULL表示新建一个mysql对象
     conn = mysql_init(NULL);
     // 检查mysql初始化是否成功
-    if (conn == NULL) {
+    if (conn == NULL)
+    {
         // 初始化失败，打印错误信息
         fprintf(stderr, "mysql_init() failed\n");
         // 返回错误
@@ -48,7 +51,8 @@ int check_user(const char *username, const char *password) {
     }
 
     // 尝试连接到数据库
-    if (mysql_real_connect(conn, DB_HOST, DB_USER, DB_PASS, DB_NAME, 0, NULL, 0) == NULL) {
+    if (mysql_real_connect(conn, DB_HOST, DB_USER, DB_PASS, DB_NAME, 0, NULL, 0) == NULL)
+    {
         // 连接失败，打印错误信息
         fprintf(stderr, "mysql_real_connect() failed: %s\n", mysql_error(conn));
         // 关闭数据库连接
@@ -63,7 +67,8 @@ int check_user(const char *username, const char *password) {
     snprintf(query, sizeof(query), "SELECT * FROM users WHERE username='%s' AND password='%s'", username, password);
 
     // 执行查询，检查是否有错误
-    if (mysql_query(conn, query)) {
+    if (mysql_query(conn, query))
+    {
         // 查询错误，打印错误信息
         fprintf(stderr, "SELECT error: %s\n", mysql_error(conn));
         // 关闭数据库连接
@@ -75,7 +80,8 @@ int check_user(const char *username, const char *password) {
     // 获取查询结果集
     res = mysql_store_result(conn);
     // 检查结果集是否成功获取
-    if (res == NULL) {
+    if (res == NULL)
+    {
         // 获取失败，打印错误信息
         fprintf(stderr, "mysql_store_result() failed\n");
         // 关闭数据库连接
@@ -97,14 +103,15 @@ int check_user(const char *username, const char *password) {
 
 /**
  * 构建并发送HTTP响应。
- * 
+ *
  * @param connection MHD连接对象，标识与客户端的连接。
  * @param message 响应消息体的内容，通常是HTML文本。
  * @param status_code 响应状态码，如200表示成功。
- * 
+ *
  * @return 返回MHD的处理结果，通常用于判断响应是否成功发送。
  */
-int send_response(struct MHD_Connection *connection, const char *message, int status_code) {
+int send_response(struct MHD_Connection *connection, const char *message, int status_code)
+{
     // 创建并初始化HTTP响应对象
     struct MHD_Response *response;
     int ret;
@@ -146,15 +153,18 @@ int send_response(struct MHD_Connection *connection, const char *message, int st
  */
 int iterate_post(void *coninfo_cls, enum MHD_ValueKind kind, const char *key,
                  const char *filename, const char *content_type,
-                 const char *transfer_encoding, const char *data, uint64_t off, size_t size) {
+                 const char *transfer_encoding, const char *data, uint64_t off, size_t size)
+{
     // 将传入的不透明指针转换为正确的类型
     struct connection_info_struct *con_info = coninfo_cls;
 
     // 检查参数名称是否为“username”或“password”
-    if (strcmp(key, "username") == 0 || strcmp(key, "password") == 0) {
+    if (strcmp(key, "username") == 0 || strcmp(key, "password") == 0)
+    {
         // 为接收更多数据而扩展post_data的大小
         char *new_data = realloc(con_info->post_data, con_info->post_data_len + size + 1);
-        if (new_data == NULL) {
+        if (new_data == NULL)
+        {
             // 内存重新分配失败
             return MHD_NO;
         }
@@ -185,13 +195,16 @@ int iterate_post(void *coninfo_cls, enum MHD_ValueKind kind, const char *key,
  */
 int request_handler(void *cls, struct MHD_Connection *connection,
                     const char *url, const char *method, const char *version,
-                    const char *upload_data, size_t *upload_data_size, void **con_cls) {
+                    const char *upload_data, size_t *upload_data_size, void **con_cls)
+{
     printf("%s %s %s\n", method, url, version);
-    printf("data:%s   upload_data_size:%d \n",upload_data,*upload_data_size);
+    printf("data:%s   upload_data_size:%d \n", upload_data, *upload_data_size);
     // 判断是否是新的连接，如果是，分配结构体并初始化
-    if (NULL == *con_cls) {
+    if (NULL == *con_cls)
+    {
         struct connection_info_struct *con_info = malloc(sizeof(struct connection_info_struct));
-        if (NULL == con_info) {
+        if (NULL == con_info)
+        {
             return MHD_NO;
         }
         con_info->post_data = NULL;
@@ -202,43 +215,87 @@ int request_handler(void *cls, struct MHD_Connection *connection,
         return MHD_YES;
     }
 
-    if (strcmp(method, "POST") == 0) {
-    struct connection_info_struct *con_info = *con_cls;
+    if (strcmp(method, "POST") == 0)
+    {
+        struct connection_info_struct *con_info = *con_cls;
 
-    if (*upload_data_size != 0) {
-        // 动态累积接收到的数据
-        con_info->post_data = realloc(con_info->post_data, con_info->post_data_len + *upload_data_size + 1);
-        if (con_info->post_data == NULL) {
-            return MHD_NO;  // 内存分配失败
+        if (*upload_data_size != 0)
+        {
+            // 动态累积接收到的数据
+            con_info->post_data = realloc(con_info->post_data, con_info->post_data_len + *upload_data_size + 1);
+            if (con_info->post_data == NULL)
+            {
+                return MHD_NO; // 内存分配失败
+            }
+            memcpy(con_info->post_data + con_info->post_data_len, upload_data, *upload_data_size);
+            con_info->post_data_len += *upload_data_size;
+            con_info->post_data[con_info->post_data_len] = '\0'; // 确保字符串结尾
+
+            *upload_data_size = 0;
+            return MHD_YES;
         }
-        memcpy(con_info->post_data + con_info->post_data_len, upload_data, *upload_data_size);
-        con_info->post_data_len += *upload_data_size;
-        con_info->post_data[con_info->post_data_len] = '\0';  // 确保字符串结尾
+        else if (*upload_data_size == 0 && con_info->post_data_len > 0)
+        {
+            // 所有数据接收完毕，开始解析
+            char username[50] = {0};
+            char password[50] = {0};
 
-        *upload_data_size = 0;
-        return MHD_YES;
-    } else if (*upload_data_size == 0 && con_info->post_data_len > 0) {
-        // 所有数据接收完毕，开始解析
-        char username[50] = {0};
-        char password[50] = {0};
+            // 手动解析POST数据
+            char *username_start = strstr(con_info->post_data, "username=");
+            char *password_start = strstr(con_info->post_data, "&password=");
 
-        // 手动解析POST数据
-        char *username_start = strstr(con_info->post_data, "username=");
-        char *password_start = strstr(con_info->post_data, "&password=");
+            // if (username_start && password_start) {
+            //     sscanf(username_start, "username=%49[^&]", username);
+            //     sscanf(password_start, "&password=%49s", password);
 
-        if (username_start && password_start) {
-            sscanf(username_start, "username=%49[^&]", username);
-            sscanf(password_start, "&password=%49s", password);
+            //     if (check_user(username, password)) {
+            //         const char *success_page = "<html><body><h1>登录成功</h1><p>欢迎回来，用户！</p></body></html>";
+            //         return send_response(connection, success_page, MHD_HTTP_OK);
+            //     } else {
+            //         const char *fail_page = "<html><body><h1>登录失败</h1><p>用户名或密码错误，请重试。</p></body></html>";
+            //         return send_response(connection, fail_page, MHD_HTTP_UNAUTHORIZED);
+            //     }
+            // }
+            if (username_start && password_start)
+            {
+                sscanf(username_start, "username=%49[^&]", username);
+                sscanf(password_start, "&password=%49s", password);
+                if (check_user(username, password))
+                {
+                    // 如果用户名和密码验证成功，设置重定向头
+                    struct MHD_Response *response;
+                    int ret;
 
-            if (check_user(username, password)) {
-                const char *success_page = "<html><body><h1>登录成功</h1><p>欢迎回来，用户！</p></body></html>";
-                return send_response(connection, success_page, MHD_HTTP_OK);
-            } else {
-                const char *fail_page = "<html><body><h1>登录失败</h1><p>用户名或密码错误，请重试。</p></body></html>";
-                return send_response(connection, fail_page, MHD_HTTP_UNAUTHORIZED);
+                    // 创建HTTP响应并设置重定向的Location头
+                    response = MHD_create_response_from_buffer(0, "", MHD_RESPMEM_PERSISTENT);
+                    MHD_add_response_header(response, MHD_HTTP_HEADER_LOCATION, "/dialogue.html");
+
+                    // 将重定向响应加入队列
+                    ret = MHD_queue_response(connection, MHD_HTTP_FOUND, response); // 使用 302 Found 状态码
+
+                    // 释放响应对象资源
+                    MHD_destroy_response(response);
+
+                    // 返回处理结果
+                    return ret;
+                }
+                else
+                {
+                    // const char *fail_page = "<html><body><h1>登录失败</h1><p>用户名或密码错误，请重试。</p></body></html>";
+                    // return send_response(connection, fail_page, MHD_HTTP_UNAUTHORIZED);
+                    // 当用户名或密码错误时，返回带有弹窗和重定向的HTML页面
+    const char *fail_page = "<html>"
+                            "<body>"
+                            "<script>"
+                            "alert('登录失败：用户名或密码错误，请重试。');"
+                            "window.location.href = '/login.html';"
+                            "</script>"
+                            "</body>"
+                            "</html>";
+    return send_response(connection, fail_page, MHD_HTTP_UNAUTHORIZED);
+                }
             }
         }
-    }
     }
 
     // 对于非POST请求，返回错误请求页面
@@ -254,17 +311,21 @@ int request_handler(void *cls, struct MHD_Connection *connection,
  * @param toe 请求终止代码，表示请求完成的原因。
  */
 void request_completed(void *cls, struct MHD_Connection *connection, void **con_cls,
-                       enum MHD_RequestTerminationCode toe) {
+                       enum MHD_RequestTerminationCode toe)
+{
     // 获取连接信息结构体指针
     struct connection_info_struct *con_info = *con_cls;
     // 检查连接信息是否已分配
-    if (con_info != NULL) {
+    if (con_info != NULL)
+    {
         // 如果POST处理器已创建，则销毁它
-        if (con_info->post_processor != NULL) {
+        if (con_info->post_processor != NULL)
+        {
             MHD_destroy_post_processor(con_info->post_processor);
         }
         // 如果POST数据已分配，则释放它
-        if (con_info->post_data != NULL) {
+        if (con_info->post_data != NULL)
+        {
             free(con_info->post_data);
         }
         // 释放连接信息结构体本身的内存
@@ -274,7 +335,8 @@ void request_completed(void *cls, struct MHD_Connection *connection, void **con_
     *con_cls = NULL;
 }
 
-int main(int argc ,char **argv) {
+int main(int argc, char **argv)
+{
     // 定义MHD守护进程结构体指针
     struct MHD_Daemon *daemon;
 
