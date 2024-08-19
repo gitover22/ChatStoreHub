@@ -10,5 +10,6 @@
         "stdio.h": "c",
         "csignal": "c",
         "log.h": "c"
-    }
+    },
+    "cmake.sourceDirectory": "/home/huafeng/ChatStoreHub/backend"
 }
