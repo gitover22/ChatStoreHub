@@ -1,0 +1,1 @@
+/usr/bin/gcc -g CMakeFiles/dialog.dir/src/dialog.c.o CMakeFiles/dialog.dir/src/log.c.o -o dialog  -lmicrohttpd 

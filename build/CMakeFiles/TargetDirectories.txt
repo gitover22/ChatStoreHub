@@ -1,0 +1,8 @@
+/home/huafeng/ChatStoreHub/build/CMakeFiles/login.dir
+/home/huafeng/ChatStoreHub/build/CMakeFiles/dialog.dir
+/home/huafeng/ChatStoreHub/build/CMakeFiles/edit_cache.dir
+/home/huafeng/ChatStoreHub/build/CMakeFiles/rebuild_cache.dir
+/home/huafeng/ChatStoreHub/build/CMakeFiles/list_install_components.dir
+/home/huafeng/ChatStoreHub/build/CMakeFiles/install.dir
+/home/huafeng/ChatStoreHub/build/CMakeFiles/install/local.dir
+/home/huafeng/ChatStoreHub/build/CMakeFiles/install/strip.dir

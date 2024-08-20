@@ -64,6 +64,39 @@ int iterate_post(void *coninfo_cls, enum MHD_ValueKind kind, const char *key,
 
     return MHD_YES;
 }
+/**
+ * @brief 通过用户的输入，调用llama模型后，得到输出
+ * @param input [in] 用户的输入
+ * @return 模型的输出
+ */
+char* get_output_from_llama(char *input) {
+    char command[1024];
+    char output[4096];
+    FILE *fp;
+
+    // 构建系统命令，将输入传递给 LLaMA 模型的 Python 脚本
+    snprintf(command, sizeof(command), "python3 model.py \"%s\"", input);
+
+    // 打开一个管道执行命令并读取结果
+    fp = popen(command, "r");
+    if (fp == NULL) {
+        perror("Failed to run command");
+        return strdup("Error: Unable to process the request.");
+    }
+
+    // 读取命令的输出
+    if (fgets(output, sizeof(output), fp) != NULL) {
+        // 关闭管道
+        pclose(fp);
+        // 返回输出结果
+        return strdup(output);
+    } else {
+        // 处理读取失败情况
+        pclose(fp);
+        return strdup("Error: No output from LLaMA.");
+    }
+}
+
 
 /**
  * @brief 请求处理函数，用于处理来自客户端的HTTP请求
@@ -104,7 +137,8 @@ int request_handler(void *cls, struct MHD_Connection *connection,
             write_log(&login_log, "Received question: %s\n", con_info->post_data);
         
             // 生成一个简单的响应
-            const char *response_msg = "This is a response from the server.";
+            // const char *response_msg = "This is a response from the server.";
+            const char *response_msg = get_output_from_llama(con_info->post_data);
             write_log(&login_log, "Sending response: %s\n", response_msg);
 
             return send_response(connection, response_msg, MHD_HTTP_OK);

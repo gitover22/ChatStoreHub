@@ -1,0 +1,22 @@
+[
+{
+  "directory": "/home/huafeng/ChatStoreHub/build",
+  "command": "/usr/bin/gcc  -I/usr/include/p11-kit-1 -g -std=gnu11 -o CMakeFiles/login.dir/src/login.c.o -c /home/huafeng/ChatStoreHub/backend/src/login.c",
+  "file": "/home/huafeng/ChatStoreHub/backend/src/login.c"
+},
+{
+  "directory": "/home/huafeng/ChatStoreHub/build",
+  "command": "/usr/bin/gcc  -I/usr/include/p11-kit-1 -g -std=gnu11 -o CMakeFiles/login.dir/src/log.c.o -c /home/huafeng/ChatStoreHub/backend/src/log.c",
+  "file": "/home/huafeng/ChatStoreHub/backend/src/log.c"
+},
+{
+  "directory": "/home/huafeng/ChatStoreHub/build",
+  "command": "/usr/bin/gcc  -I/usr/include/p11-kit-1 -g -std=gnu11 -o CMakeFiles/dialog.dir/src/dialog.c.o -c /home/huafeng/ChatStoreHub/backend/src/dialog.c",
+  "file": "/home/huafeng/ChatStoreHub/backend/src/dialog.c"
+},
+{
+  "directory": "/home/huafeng/ChatStoreHub/build",
+  "command": "/usr/bin/gcc  -I/usr/include/p11-kit-1 -g -std=gnu11 -o CMakeFiles/dialog.dir/src/log.c.o -c /home/huafeng/ChatStoreHub/backend/src/log.c",
+  "file": "/home/huafeng/ChatStoreHub/backend/src/log.c"
+}
+]
